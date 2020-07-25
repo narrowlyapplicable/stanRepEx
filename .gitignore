@@ -3,3 +3,4 @@
 /venv/
 /stanRepEx/__pycache__/
 requirements.lock
+replica_exchange_old.py
