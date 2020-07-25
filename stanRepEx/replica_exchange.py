@@ -1,5 +1,3 @@
-#from concurrent.futures import ProcessPoolExecutor, as_completed
-
 import numpy as np
 from pystan import StanModel
 
@@ -70,8 +68,8 @@ class ReplicaExchange:
 
             for rr in range(self.n_rep):
                 ms = fit_list[idx_tbl[ee, rr]].extract(permuted=False)[-1, 0, :np.sum(par_length)]
-                init_dict = [dict(zip(par_init, np.split(ms, np.cumsum(par_length))))]
-                init_list[rr] = [{k:v for k,v in zip(init_dict[0].keys(), [self.cast_staninit(init[1]) for init in init_dict[0].items()])}]
+                init_dict = dict(zip(par_init, np.split(ms, np.cumsum(par_length))))
+                init_list[rr] = [{k:v for k,v in zip(init_dict.keys(), [self.cast_staninit(init[1]) for init in init_dict.items()])}]
 
         return ms_T1, idx_tbl, E_tbl
 
@@ -95,14 +93,17 @@ class ReplicaExchange:
         """Convert a parameter to scalar.
 
         Args:
-            init (ndarray or int): Initial value of the parameter to be sampled by MCMC
+            init (ndarray): Initial value of the parameter to be sampled by MCMC
 
         Returns:
             init: the parameter converted to scalar.
         """    
-        try:
-            return np.asscalar(init)
-        except ValueError:
+        if(init.size==1):
+            try:
+                return np.asscalar(init)
+            except ValueError:
+                return init
+        else:
             return init
 
     @staticmethod
@@ -125,10 +126,16 @@ class ReplicaExchange:
 
 
 if __name__ == "__main__":
+    import argparse
     import pickle
+
     from scipy.stats import multivariate_normal
 
-    filename = "./model/gmm-posterior-PT.pickle"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stanmodel", help="path stanmodel")
+    args = parser.parse_args()
+
+    filename = args.stanmodel #"./model/gmm-posterior-PT.pickle"
     with open(filename, mode="rb") as f:
         stanmodel = pickle.load(f)
     
