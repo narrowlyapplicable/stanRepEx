@@ -1,1 +1,2 @@
 from stanRepEx.replica_exchange import ReplicaExchange
+from stanRepEx.replica_exchange_parallel import ReplicaExchangeParallel
