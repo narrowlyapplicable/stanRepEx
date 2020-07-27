@@ -172,14 +172,14 @@ if __name__ == "__main__":
     z += A2*multivariate_normal.pdf(mean=[4, 4], cov=[[0.2, 0], [0, 0.2]], x=np.c_[grid[0].reshape(-1), grid[1].reshape(-1)])
 
     data = {}
-    init = [{"p":np.array([0.0, 0.0])}]
+    init = dict(p=np.array([0, 0]))
 
     N_rep = 30 ## number of replicas
     N_ex = 200 ## number of exchanges
     Inv_T = 0.5 ** np.linspace(0, -np.log(0.2)/np.log(2), num=N_rep)
 
     replica_exchange = ReplicaExchangeParallel(n_ex=N_ex, inv_T=Inv_T, stanmodel = stanmodel)
-    result = replica_exchange.sampling(data=data, par_init=dict(p=np.array([0, 0])), n_iter=70, warmup=50)
+    result = replica_exchange.sampling(data=data, par_init=init, n_iter=70, warmup=50)
 
     fig = plt.figure()
     fig.tight_layout()

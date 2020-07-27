@@ -129,6 +129,9 @@ if __name__ == "__main__":
     import argparse
     import pickle
 
+    import matplotlib.pyplot as plt 
+
+    from mpl_toolkits.mplot3d import Axes3D 
     from scipy.stats import multivariate_normal
 
     parser = argparse.ArgumentParser()
@@ -147,11 +150,19 @@ if __name__ == "__main__":
     z += A2*multivariate_normal.pdf(mean=[4, 4], cov=[[0.2, 0], [0, 0.2]], x=np.c_[grid[0].reshape(-1), grid[1].reshape(-1)])
 
     data = {}
-    init = [{"p":np.array([0.0, 0.0])}]
+    init = dict(p=np.array([0, 0]))
 
     N_rep = 30 ## number of replicas
     N_ex = 200 ## number of exchanges
     Inv_T = 0.5 ** np.linspace(0, -np.log(0.2)/np.log(2), num=N_rep)
 
     replica_exchange = ReplicaExchange(n_ex=N_ex, inv_T=Inv_T, stanmodel = stanmodel)
-    result = replica_exchange.sampling(data=data, par_init=dict(p=np.array([0, 0])), n_iter=70, warmup=50)
+    result = replica_exchange.sampling(data=data, par_init=init, n_iter=70, warmup=50)
+
+    fig = plt.figure()
+    fig.tight_layout()
+    ax = Axes3D(fig)
+
+    ax.plot_wireframe(grid[0], grid[1], z.reshape(grid[0].shape), color="tab:green", alpha=0.3)
+    ax.scatter(result[0][100:,0], result[0][100:,1], alpha=0.3)
+    plt.show()
