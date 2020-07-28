@@ -10,7 +10,7 @@ setup(
     url='https://github.com/narrowlyapplicable/stanRepEx',
     packages=find_packages(),
     keywords='mcmc replica-exchange pystan markov-chain-monte-carlo',
-    install_requires=['numpy>1.13.0', 'pystan>2.19.0'],
+    install_requires=['numpy>=1.15.0', 'pystan>=2.19.0'],
     python_requires='>=3.6',
 
     classifiers=[
