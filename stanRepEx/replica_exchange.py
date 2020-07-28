@@ -3,6 +3,8 @@ from pystan import StanModel
 
 
 class ReplicaExchange:
+    """Replica Exchange Monte Carlo.
+    """    
     def __init__(self, n_ex, *, inv_T, stanmodel=None, file=None):
         """initialaize ReplicaExchange
 
@@ -10,6 +12,7 @@ class ReplicaExchange:
             n_ex (int): Total number of replica exchange.
             inv_T (ndarray): ndarray of inverse temperatures.
             stanmodel (StanModel): StanModel instance used for MCMC.
+            file (str) : filename of `.stan` file.
         """        
         self.n_ex = n_ex
         self.inv_T = inv_T
@@ -30,7 +33,7 @@ class ReplicaExchange:
             data (dict): Standata for the stanmodel.
             n_iter (int): Positive integer specifying how many iterations for each stanmodel before swapping replicas.
             warmup (int): Positive integer specifying number of warmup (aka burin) iterations. 
-            par_init (dict): List of dict that store the initial values of the parameters to be sampled.
+            par_init (dict): dict that store the initial values of the parameters to be sampled.
 
         Returns:
             ms_T1: Samples from the replica that inv_T=1.0 .
@@ -50,8 +53,9 @@ class ReplicaExchange:
         for ee in range(self.n_ex):
             fit_list = []
             for r in range(self.n_rep):
-                data["beta"] = self.inv_T[r]
-                fit_list.append(self.stanmodel.sampling(data=data, init=init_list[r], iter=n_iter, warmup=warmup, chains=1, seed=r, check_hmc_diagnostics=False))
+                data_tmp = data.copy()
+                data_tmp["beta"] = self.inv_T[r]
+                fit_list.append(self.stanmodel.sampling(data=data_tmp, init=init_list[r], iter=n_iter, warmup=warmup, chains=1, seed=r, check_hmc_diagnostics=False))
             ms_T1[ee * len_mcmc : (ee+1) * len_mcmc, :] = fit_list[0].extract(permuted=False, inc_warmup=False)[:,0,:]
 
             ## exchange replicas
@@ -107,17 +111,17 @@ class ReplicaExchange:
             return init
 
     @staticmethod
-    def get_par_length(par_list):
-        """get 
+    def get_par_length(par_dict):
+        """get length of each parameter.
 
         Args:
-            par_list ([type]): [description]
+            par_dict (dict): list of parameters.
 
         Returns:
-            [type]: [description]
+            ndarray of all parameters' length.
         """    
         par_length = []
-        for item in par_list.values():
+        for item in par_dict.values():
             try:
                 par_length += [len(item)]
             except TypeError:

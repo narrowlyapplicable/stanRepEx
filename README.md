@@ -1,6 +1,6 @@
 # Replica Exchange MC using PyStan
 
-is based on the implementation example (using R & RStan) on [this site](https://statmodeling.hatenablog.com/entry/stan-parallel-tempering) 
+based on the implementation example (using R & RStan) on [this site](https://statmodeling.hatenablog.com/entry/stan-parallel-tempering) 
 
 ## Requirement
 - NumPy
@@ -33,5 +33,5 @@ result = replica_exchange.sampling(data=data, par_init=init, n_iter=70, warmup=5
 ```
 
 ## DEMONSTRATION
-- [test.ipynb](https://github.com/narrowlyapplicable/stanRepEx/blob/master/test.ipynb)
+- [demo.ipynb](https://github.com/narrowlyapplicable/stanRepEx/blob/master/demo.ipynb)
 

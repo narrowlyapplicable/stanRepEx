@@ -5,6 +5,8 @@ from pystan import StanModel
 
 
 class ReplicaExchangeParallel:
+    """Replica Exchange Monte Carlo using Parallel Processing.
+    """    
     def __init__(self, n_ex, *, inv_T, stanmodel=None, file=None):
         """initialaize ReplicaExchange
 
@@ -12,6 +14,7 @@ class ReplicaExchangeParallel:
             n_ex (int): Total number of replica exchange.
             inv_T (ndarray): ndarray of inverse temperatures.
             stanmodel (StanModel): StanModel instance used for MCMC.
+            file (str) : filename of `.stan` file.
         """        
         self.n_ex = n_ex
         self.inv_T = inv_T
@@ -26,12 +29,30 @@ class ReplicaExchangeParallel:
                 raise TypeError("missing 1 required keyword-only argument: 'stanmodel'")
     
     def _repdata(self, init, r):
+        """make datadict for self._replica
+
+        Args:
+            init (dict): dict of initial values of parameters.
+            r (int): number of replica.
+
+        Returns:
+            dict_data: dict of data for self._replica.
+        """        
         data = self.data.copy() ### need ".copy()"!
         data["beta"] = self.inv_T[r]
         # return {"stanmodel":stanmodel, "data":data, "init":init, "iter":self.n_iter, "warmup":self.warmup, "r":r}
         return {"data":data, "init":init, "r":r}
     
     def _replica(self, dict_data):
+        """MCMC of each replica.
+
+        Args:
+            dict_data (dict): dict of data for stanmodel.
+
+        Returns:
+            fit (Stan4Fit): result.
+            r (int): number of replica.
+        """        
         # fit = self.stanmodel.sampling(data=dict_data["data"], init=dict_data["init"], iter=dict_data["n_iter"], warmup=dict_data["warmup"], chains=1, seed=dict_data["r"], check_hmc_diagnostics=False)
         fit = self.stanmodel.sampling(data=dict_data["data"], init=dict_data["init"], iter=self.n_iter, warmup=self.warmup, chains=1, seed=dict_data["r"], check_hmc_diagnostics=False)
         return fit, dict_data["r"]
@@ -43,7 +64,7 @@ class ReplicaExchangeParallel:
             data (dict): Standata for the stanmodel.
             n_iter (int): Positive integer specifying how many iterations for each stanmodel before swapping replicas.
             warmup (int): Positive integer specifying number of warmup (aka burin) iterations. 
-            par_init (dict): List of dict that store the initial values of the parameters to be sampled.
+            par_init (dict): dict that store the initial values of the parameters to be sampled.
 
         Returns:
             ms_T1: Samples from the replica that inv_T=1.0 .
@@ -129,17 +150,17 @@ class ReplicaExchangeParallel:
             return init
 
     @staticmethod
-    def get_par_length(par_list):
-        """get 
+    def get_par_length(par_dict):
+        """get length of each parameter.
 
         Args:
-            par_list ([type]): [description]
+            par_dict (dict): list of parameters.
 
         Returns:
-            [type]: [description]
+            ndarray of all parameters' length.
         """    
         par_length = []
-        for item in par_list.values():
+        for item in par_dict.values():
             try:
                 par_length += [len(item)]
             except TypeError:
