@@ -209,3 +209,11 @@ if __name__ == "__main__":
     ax.plot_wireframe(grid[0], grid[1], z.reshape(grid[0].shape), color="tab:green", alpha=0.3)
     ax.scatter(result[0][100:,0], result[0][100:,1], alpha=0.3)
     plt.show()
+    
+    params = ["p0", "p1", "lp__"]
+    fig, ax = plt.subplots(1, 3, figsize=(10,3))
+    for ii in range(3):
+        ax[ii].set_title(params[ii])
+        ax[ii].plot(result[0][100:,ii], color="tab:blue")
+    fig.tight_layout()
+    plt.show()
